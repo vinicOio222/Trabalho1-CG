@@ -8,12 +8,12 @@ class Screen:
 
     def __init__(self):
         pygame.init()
-        self.screen = pygame.display.set_mode((WIDTH, HEIGHT))
+        self.canvas = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Basketball Arcade")
 
-    def clear(self, color=(0, 0, 0)):
+    def clear(self, color=(200, 200, 200)):
         """Clear the screen with the given color."""
-        self.screen.fill(color)
+        self.canvas.fill(color)
 
     def update(self): # noqa
         """Update the display."""
