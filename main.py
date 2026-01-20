@@ -1,7 +1,7 @@
 """Main module for the basket ball game application."""
 import pygame
 from core.screen import Screen
-from graphic.shapes import line_dda
+from graphic.shapes import draw_circle
 
 
 def main():
@@ -17,7 +17,7 @@ def main():
 
         screen.clear((0, 0, 0))
         # Example of setting a pixel in the center of the screen
-        line_dda(screen.screen, 100, 100, 700, 500, (255, 0, 0))
+        draw_circle(screen.screen, 400, 300, 10, (255, 0, 0))
         screen.update()
         clock.tick(60)
 
