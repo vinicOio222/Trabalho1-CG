@@ -168,3 +168,41 @@ def draw_ellipse(surface, xc, yc, a, b, color):
             dx += 2 * b2
             dy -= 2 * a2
             d2 += dx - dy + a2
+
+
+def draw_hoop_net_basic(surface, xc, yc, a, net_height, color):
+    """
+    Draw a basic basketball net below the hoop using Bresenham lines.
+    The net narrows toward the bottom to keep mesh cells uniform.
+    """
+    spacing = 6  # spacing between net lines
+    max_offset = 4  # maximum horizontal offset at the top of the net
+
+    # Draw vertical lines for the net
+    for x in range(xc - a, xc + a + 1, spacing):
+
+        # Draw right slanting lines (\)
+        for i in range(0, net_height, spacing):
+            t = i / net_height
+            offset = int(max_offset * (1 - t))
+
+            x0 = x + offset
+            y0 = yc + i
+
+            x1 = x
+            y1 = yc + i + spacing
+
+            draw_line(surface, x0, y0, x1, y1, color)
+
+        # Draw left slanting lines (/)
+        for i in range(0, net_height, spacing):
+            t = i / net_height
+            offset = int(max_offset * (1 - t))
+
+            x0 = x - offset
+            y0 = yc + i
+
+            x1 = x
+            y1 = yc + i + spacing
+
+            draw_line(surface, x0, y0, x1, y1, color)

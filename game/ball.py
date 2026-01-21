@@ -11,14 +11,17 @@ class BasketBall:
         self.yc = yc
         self.velocity = [0, 0]
         self.r = 15
-        self.colors = [(255, 165, 0), (0, 0, 0)]  # Orange with black details
+        self.colors = {
+            "fill": (255, 165, 0),
+            "border_and_details": (0, 0, 0)
+        }
 
     def draw(self, surface):
         """Draw the basketball on the given surface."""
         # Draw the outer circle and cross details
-        draw_circle(surface, self.xc, self.yc, self.r, self.colors[1])
-        draw_line(surface, self.xc - self.r, self.yc, self.xc + self.r, self.yc, self.colors[1])
-        draw_line(surface, self.xc, self.yc - self.r, self.xc, self.yc + self.r,self.colors[1])
+        draw_circle(surface, self.xc, self.yc, self.r, self.colors["border_and_details"])
+        draw_line(surface, self.xc - self.r, self.yc, self.xc + self.r, self.yc, self.colors["border_and_details"])
+        draw_line(surface, self.xc, self.yc - self.r, self.xc, self.yc + self.r,self.colors["border_and_details"])
 
         r_arc = int(self.r * 1.6) # Radius for the arcs
 
@@ -32,7 +35,7 @@ class BasketBall:
             self.xc,
             self.yc,
             self.r,
-            self.colors[1]
+            self.colors["border_and_details"]
         )
         # Left arc
         draw_arc(
@@ -43,11 +46,18 @@ class BasketBall:
             self.xc,
             self.yc,
             self.r,
-            self.colors[1]
+            self.colors["border_and_details"]
         )
 
         # Fill the circle using scan-line algorithm
-        circle_scanline(surface, self.xc, self.yc, self.r, self.colors[0], self.colors[1])
+        circle_scanline(
+            surface,
+            self.xc,
+            self.yc,
+            self.r,
+            self.colors["fill"],
+            self.colors["border_and_details"]
+        )
 
     def shot(self, vx, vy):
         """Set the initial velocity of the basketball."""

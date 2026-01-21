@@ -1,6 +1,6 @@
 """Module for drawing a basketball hoop using Pygame."""
 from graphic.scan_line import hoop_scanline
-from graphic.shapes import draw_ellipse
+from graphic.shapes import draw_ellipse, draw_hoop_net_basic
 
 
 class BasketHoop:
@@ -12,10 +12,25 @@ class BasketHoop:
         self.b_inner = 6 # Inner ellipse semi-minor axis
         self.xc = xc
         self.yc = yc
-        self.colors = [(255, 0, 0), (0, 0, 0)]  # Red hoop with black outline
+        self.net_height = 40
+        self.net_spacing = 8
+        self.colors = {
+            "fill": (255, 0, 0),
+            "border": (0, 0, 0),
+            "net": (255, 255, 255)
+        }
 
     def draw(self, surface):
         """Draw the basketball hoop on the given surface."""
+
+        draw_hoop_net_basic(
+            surface,
+            self.xc,
+            self.yc + self.b_inner,
+            self.a_inner,
+            self.net_height,
+            self.colors["net"]
+        )
 
         # Draw outer and inner ellipses
         draw_ellipse(
@@ -24,7 +39,7 @@ class BasketHoop:
             self.yc,
             self.a_outer,
             self.b_outer,
-            self.colors[1]
+            self.colors["border"]
         )
 
         draw_ellipse(
@@ -33,7 +48,7 @@ class BasketHoop:
             self.yc,
             self.a_inner,
             self.b_inner,
-            self.colors[1]
+            self.colors["border"]
         )
 
         # Scan-line fill the hoop shape
@@ -41,5 +56,5 @@ class BasketHoop:
             surface, self.xc, self.yc,
             self.a_outer, self.b_outer,
             self.a_inner, self.b_inner,
-            self.colors[0], self.colors[1]
+            self.colors["fill"], self.colors["border"]
         )

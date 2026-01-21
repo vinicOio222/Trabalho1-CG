@@ -11,7 +11,7 @@ class Screen:
         self.canvas = pygame.display.set_mode((WIDTH, HEIGHT))
         pygame.display.set_caption("Basketball Arcade")
 
-    def clear(self, color=(200, 200, 200)):
+    def clear(self, color=(128,128,128)): # dark gray
         """Clear the screen with the given color."""
         self.canvas.fill(color)
 

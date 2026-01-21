@@ -3,6 +3,7 @@ import pygame
 from core.screen import Screen
 from game.ball import BasketBall
 from game.hoop import BasketHoop
+from game.score_board import ScoreBoard
 
 
 def main():
@@ -22,6 +23,8 @@ def main():
         ball.draw(canvas)
         hoop = BasketHoop(650, 200)
         hoop.draw(canvas)
+        score_board = ScoreBoard()
+        score_board.draw(canvas)
         screen.update()
         clock.tick(60)
 
