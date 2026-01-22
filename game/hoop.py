@@ -58,3 +58,13 @@ class BasketHoop:
             self.a_inner, self.b_inner,
             self.colors["fill"], self.colors["border"]
         )
+
+    def check_score(self, ball):
+        """Check if the ball passed through the hoop to score."""
+        # Check if ball is in the horizontal range of the hoop
+        if abs(ball.xc - self.xc) <= self.a_inner:
+            # Check if ball is at the hoop level and moving downward
+            if (self.yc - 5 <= ball.yc <= self.yc + 15 and 
+                ball.velocity[1] > 0):
+                return True
+        return False
