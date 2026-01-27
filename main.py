@@ -73,6 +73,9 @@ def main():
 
         # Draw everything
         screen.clear()
+
+        screen.display_minimap(canvas, ball, hoop)
+        
         hoop.draw(canvas)
         ball.draw(canvas)
         score_board.draw(canvas)
