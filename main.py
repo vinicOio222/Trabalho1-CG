@@ -13,7 +13,7 @@ def main():
     clock = pygame.time.Clock()
 
     # Initialize game objects
-    ball = BasketBall(100, 500)
+    ball = BasketBall(150, 400)
     hoop = BasketHoop(650, 200)
     score_board = ScoreBoard()
     

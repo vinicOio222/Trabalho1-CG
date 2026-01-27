@@ -3,7 +3,7 @@ import pygame
 
 class ScoreBoard:
     """Class to manage and display the game score."""
-    def __init__(self, x=10, y=10, color=(255, 255, 255), font_size=24):
+    def __init__(self, x=330, y=10, color=(255, 255, 255), font_size=24):
         self.x = x
         self.y = y
         self.color = color
