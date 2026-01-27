@@ -3,15 +3,18 @@ from graphic.shapes import set_pixel
 
 def circle_scanline(surface, xc, yc, r, fill_color, border_color):
     """Scan-line fill a circle centered at (xc, yc) with radius r"""
+    
+    # Get surface dimensions
+    width, height = surface.get_size()
 
     # Iterate over each y-coordinate within the circle's bounding box
-    for y in range(yc - r + 1, yc + r):
+    for y in range(max(0, yc - r + 1), min(height, yc + r)):
         inside = False
         x_start = None
         x_end = None
 
         # Find the start and end x-coordinates for the current y
-        for x in range(xc - r, xc + r + 1):
+        for x in range(max(0, xc - r), min(width, xc + r + 1)):
             if (x - xc)**2 + (y - yc)**2 <= r*r:
                 if not inside:
                     x_start = x
@@ -22,8 +25,9 @@ def circle_scanline(surface, xc, yc, r, fill_color, border_color):
             continue
 
         for x in range(x_start, x_end + 1):
-            if surface.get_at((x, y)) != border_color:
-                set_pixel(surface,x, y, fill_color)
+            if 0 <= x < width and 0 <= y < height:
+                if surface.get_at((x, y)) != border_color:
+                    set_pixel(surface, x, y, fill_color)
 
 
 def hoop_scanline(
