@@ -1,8 +1,9 @@
 """BasketBall class representing a basketball with drawing and movement capabilities."""
 
 from graphic.scan_line import circle_scanline
-from graphic.shapes import draw_circle, draw_line, draw_arc
+from graphic.shapes import draw_circle, draw_line_bresenham, draw_arc
 
+import math
 
 class BasketBall:
     """Class representing a basketball."""
@@ -16,11 +17,23 @@ class BasketBall:
         self.is_shot = False
         self.is_dragging = False
         self.drag_start = None
+        self.angle = 0  # Ângulo atual em radianos
+        self.angular_velocity = 0  # Velocidade angular
         self.colors = {
             "fill": (255, 165, 0),
             "border_and_details": (0, 0, 0)
         }
 
+    def _rotate_point(self, x, y):
+        """Rotaciona um ponto (x, y) ao redor do centro da bola."""
+        dx = x - self.xc
+        dy = y - self.yc
+        cos_a = math.cos(self.angle)
+        sin_a = math.sin(self.angle)
+        x_new = dx * cos_a - dy * sin_a + self.xc
+        y_new = dx * sin_a + dy * cos_a + self.yc
+        return x_new, y_new
+    
     def draw(self, surface):
         """Draw the basketball on the given surface."""
         # Convert coordinates to integers for drawing
@@ -29,28 +42,35 @@ class BasketBall:
         
         # Draw the outer circle and cross details
         draw_circle(surface, xc, yc, self.r, self.colors["border_and_details"])
-        draw_line(surface, xc - self.r, yc, xc + self.r, yc, self.colors["border_and_details"])
-        draw_line(surface, xc, yc - self.r, xc, yc + self.r,self.colors["border_and_details"])
+        # Linha horizontal rotacionada
+        h1_x, h1_y = self._rotate_point(xc - self.r, yc)
+        h2_x, h2_y = self._rotate_point(xc + self.r, yc)
+        draw_line_bresenham(surface, int(h1_x), int(h1_y), int(h2_x), int(h2_y), self.colors["border_and_details"])
+        # Linha vertical rotacionada
+        v1_x, v1_y = self._rotate_point(xc, yc - self.r)
+        v2_x, v2_y = self._rotate_point(xc, yc + self.r)
+        draw_line_bresenham(surface, int(v1_x), int(v1_y), int(v2_x), int(v2_y), self.colors["border_and_details"])
 
         r_arc = int(self.r * 1.6) # Radius for the arcs
 
-        # Draw the arcs for basketball details
-        # Right arc
+        # Right arc rotacionado
+        arc_right_x, arc_right_y = self._rotate_point(xc + self.r, yc)
         draw_arc(
             surface,
-            xc + self.r,
-            yc,
+            int(arc_right_x),
+            int(arc_right_y),
             r_arc,
             xc,
             yc,
             self.r,
             self.colors["border_and_details"]
         )
-        # Left arc
+        # Left arc rotacionado
+        arc_left_x, arc_left_y = self._rotate_point(xc - self.r, yc)
         draw_arc(
             surface,
-            xc - self.r,
-            yc,
+            int(arc_left_x),
+            int(arc_left_y),
             r_arc,
             xc,
             yc,
@@ -73,12 +93,14 @@ class BasketBall:
         self.velocity = [vx, vy]
         self.is_shot = True
 
+    # Translation
     def update(self, gravity=0.5):
         """Update the position of the basketball based on its velocity and gravity."""
         if self.is_shot:
             self.velocity[1] += gravity
             self.xc += self.velocity[0]
             self.yc += self.velocity[1]
+            self.angle += self.angular_velocity
 
     def reset(self):
         """Reset the ball to its initial position."""
@@ -88,6 +110,8 @@ class BasketBall:
         self.is_shot = False
         self.is_dragging = False
         self.drag_start = None
+        self.angle = 0  # Reseta ângulo
+        self.angular_velocity = 0
 
     def is_out_of_bounds(self, width, height):
         """Check if the ball is out of bounds."""
@@ -127,6 +151,7 @@ class BasketBall:
             # Calculate velocity based on drag distance
             vx = (self.initial_x - self.xc) * 0.3
             vy = (self.initial_y - self.yc) * 0.3
+            self.angular_velocity = vx * 0.01
             self.shot(vx, vy)
             self.is_dragging = False
             self.drag_start = None

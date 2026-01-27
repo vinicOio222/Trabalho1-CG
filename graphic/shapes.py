@@ -6,9 +6,9 @@ def set_pixel(surface, x, y, color):
         surface.set_at((int(x), int(y)), color)
 
 
-def draw_line(surface, x0, y0, x1, y1, color):
+def draw_line_bresenham(surface, x0, y0, x1, y1, color):
     """
-    Draw a line from (x1, y1) to (x2, y2)
+    Draw a line from (x0, y0) to (x1, y1)
     on the given surface using Bresenham's algorithm.
     """
     dx = abs(x1 - x0)
@@ -192,7 +192,7 @@ def draw_hoop_net_basic(surface, xc, yc, a, net_height, color):
             x1 = x
             y1 = yc + i + spacing
 
-            draw_line(surface, x0, y0, x1, y1, color)
+            draw_line_bresenham(surface, x0, y0, x1, y1, color)
 
         # Draw left slanting lines (/)
         for i in range(0, net_height, spacing):
@@ -205,4 +205,4 @@ def draw_hoop_net_basic(surface, xc, yc, a, net_height, color):
             x1 = x
             y1 = yc + i + spacing
 
-            draw_line(surface, x0, y0, x1, y1, color)
+            draw_line_bresenham(surface, x0, y0, x1, y1, color)
