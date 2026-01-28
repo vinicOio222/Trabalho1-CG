@@ -4,6 +4,7 @@ from core.screen import Screen
 from game.ball import BasketBall
 from game.hoop import BasketHoop
 from game.score_board import ScoreBoard
+from game.ground import Ground
 
 
 def main():
@@ -13,8 +14,9 @@ def main():
     clock = pygame.time.Clock()
 
     # Initialize game objects
-    ball = BasketBall(100, 500)
+    ball = BasketBall(150, 400)
     hoop = BasketHoop(650, 200)
+    ground = Ground(560, 800, 600)
     score_board = ScoreBoard()
     
     # Game state variables
@@ -71,8 +73,12 @@ def main():
                 ball.reset()
                 scored = False
 
-        # Draw everything
+        # Screen rendering
         screen.clear()
+        ground.draw(canvas)
+        screen.display_minimap(canvas, ball, hoop)
+
+        # Draw game objects
         hoop.draw(canvas)
         ball.draw(canvas)
         score_board.draw(canvas)
@@ -129,7 +135,7 @@ def main():
             
             # Display drag info
             font = pygame.font.SysFont(None, 20)
-            info_text = f"Distância: {distance:.1f}  Ângulo: {angle_deg:.1f}°"
+            info_text = f"Range: {distance:.1f}  Angle: {angle_deg:.1f}°"
             text_surface = font.render(info_text, True, (255, 255, 0))
             canvas.blit(text_surface, (ball.initial_x - 80, ball.initial_y - 40))
         
@@ -139,7 +145,7 @@ def main():
             text = font.render("GAME OVER! Press R to restart", True, (255, 0, 0))
             text_rect = text.get_rect(center=(400, 300))
             canvas.blit(text, text_rect)
-        
+
         screen.update()
         clock.tick(60)
 

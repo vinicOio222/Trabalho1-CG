@@ -12,15 +12,16 @@ Nada de usar funções prontas exceto as que fazem o set pixel, que exibem matri
 - Input mouse
 - Primitivas
 - rotação (bola rodando)
+- Translação (precisa melhorar como está apresentado/implementado)
+- escala
+- viewport com minimap
 
 ### Falta:
-- escala
+- Falta clipping no minimap
 - personagem
 - boneco pulando (animação)
 - Viewport com zoom (minimapa focando a cara do personagem, usando clipping)
 - cenário (provavelmente um png do ceu azul e um chão)
-- viewport com minimap (usando clipping)
 - Menu inicial
-- Função scanline (falta adicionar no menu e no título)
+- Função scanline_floodfill (falta adicionar no menu e no título)
 - clipping (is_out_of_bound, mas tem que melhorar pra usar as funções do professor)
-- Translação (precisa melhorar como está apresentado/implementado)

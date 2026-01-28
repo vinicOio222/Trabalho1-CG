@@ -5,29 +5,51 @@ def set_pixel(surface, x, y, color):
     if 0 <= x < surface.get_width() and 0 <= y < surface.get_height():
         surface.set_at((int(x), int(y)), color)
 
+def draw_polygon(surface, points, color):
+    """
+    Draw a polygon defined by a list of points
+    on the given surface using Bresenham's line algorithm.
+    """
+    # Number of points in the polygon
+    n = len(points)
+
+    # Draw line from last point to first point to close the polygon
+    for i in range(n):
+        x0, y0 = points[i]
+        x1, y1 = points[(i + 1) % n]
+        draw_line_bresenham(surface, int(x0), int(y0), int(x1), int(y1), color)
 
 def draw_line_bresenham(surface, x0, y0, x1, y1, color):
     """
     Draw a line from (x0, y0) to (x1, y1)
     on the given surface using Bresenham's algorithm.
     """
-    dx = abs(x1 - x0)
-    dy = abs(y1 - y0)
-    sx = 1 if x0 < x1 else -1
-    sy = 1 if y0 < y1 else -1
-    err = dx - dy
+    steep = abs(y1 - y0) > abs(x1 - x0)
+    if steep:
+        x0, y0 = y0, x0
+        x1, y1 = y1, x1
 
-    while True:
-        set_pixel(surface, x0, y0, color)
-        if x0 == x1 and y0 == y1:
-            break
-        err2 = err * 2
-        if err2 > -dy:
-            err -= dy
-            x0 += sx
-        if err2 < dx:
-            err += dx
-            y0 += sy
+    if x0 > x1:
+        x0, x1 = x1, x0
+        y0, y1 = y1, y0
+
+    dx = x1 - x0
+    dy = abs(y1 - y0)
+    y_step = 1 if y0 < y1 else -1
+
+    d = 2 * dy - dx
+    y = y0
+
+    for x in range(x0, x1 + 1):
+        if steep:
+            set_pixel(surface, y, x, color)
+        else:
+            set_pixel(surface, x, y, color)
+
+        if d > 0:
+            y += y_step
+            d -= 2 * dx
+        d += 2 * dy
 
 
 def draw_circle(surface, xc, yc, r, color):
