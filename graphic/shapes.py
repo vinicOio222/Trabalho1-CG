@@ -6,7 +6,14 @@ def set_pixel(surface, x, y, color):
         surface.set_at((int(x), int(y)), color)
 
 def draw_polygon(surface, points, color):
+    """
+    Draw a polygon defined by a list of points
+    on the given surface using Bresenham's line algorithm.
+    """
+    # Number of points in the polygon
     n = len(points)
+
+    # Draw line from last point to first point to close the polygon
     for i in range(n):
         x0, y0 = points[i]
         x1, y1 = points[(i + 1) % n]
@@ -28,7 +35,7 @@ def draw_line_bresenham(surface, x0, y0, x1, y1, color):
 
     dx = x1 - x0
     dy = abs(y1 - y0)
-    ystep = 1 if y0 < y1 else -1
+    y_step = 1 if y0 < y1 else -1
 
     d = 2 * dy - dx
     y = y0
@@ -40,7 +47,7 @@ def draw_line_bresenham(surface, x0, y0, x1, y1, color):
             set_pixel(surface, x, y, color)
 
         if d > 0:
-            y += ystep
+            y += y_step
             d -= 2 * dx
         d += 2 * dy
 

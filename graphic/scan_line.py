@@ -82,3 +82,148 @@ def hoop_scanline(
             for x in range(left_outer, right_outer + 1):
                 if surface.get_at((x, y)) != border_color:
                     set_pixel(surface, x, y, fill_color)
+
+
+def color_interpolate(color1, color2, t):
+    """Interpolate between two colors."""
+    r = int(color1[0] + (color2[0] - color1[0]) * t)
+    g = int(color1[1] + (color2[1] - color1[1]) * t)
+    b = int(color1[2] + (color2[2] - color1[2]) * t)
+
+    # Clamp values to valid range
+    r = max(0, min(255, r))
+    g = max(0, min(255, g))
+    b = max(0, min(255, b))
+    
+    return r, g, b
+
+
+def scanline_gradient_sky(surface, top_color, bottom_color):
+    """
+    Render a full-screen sky background using a polygon-based
+    scanline gradient fill.
+
+    Args:
+        surface (pygame.Surface): Target surface.
+        top_color (tuple): RGB color at the top of the screen.
+        bottom_color (tuple): RGB color at the bottom of the screen.
+    """
+    width, height = surface.get_size()
+
+    # Screen rectangle as a polygon
+    points = [
+        (0, 0),              # top-left
+        (width, 0),          # top-right
+        (width, height),     # bottom-right
+        (0, height)          # bottom-left
+    ]
+
+    # Colors associated with each vertex
+    colors = [
+        top_color,     # top-left
+        top_color,     # top-right
+        bottom_color,  # bottom-right
+        bottom_color   # bottom-left
+    ]
+
+    ys = [p[1] for p in points]
+    y_min = int(min(ys))
+    y_max = int(max(ys))
+
+    n = len(points)
+
+    for y in range(y_min, y_max):
+        intersections = []
+
+        for i in range(n):
+            x0, y0 = points[i]
+            x1, y1 = points[(i + 1) % n]
+
+            c0 = colors[i]
+            c1 = colors[(i + 1) % n]
+
+            # Ignore horizontal edges
+            if y0 == y1:
+                continue
+
+            # Ensure y0 < y1
+            if y0 > y1:
+                x0, y0, x1, y1 = x1, y1, x0, y0
+                c0, c1 = c1, c0
+
+            # Scanline inclusion rule
+            if y < y0 or y >= y1:
+                continue
+
+            # Edge interpolation
+            t = (y - y0) / (y1 - y0)
+            x = x0 + t * (x1 - x0)
+            color_y = color_interpolate(c0, c1, t)
+
+            intersections.append((x, color_y))
+
+        # Sort intersections by x
+        intersections.sort(key=lambda item: item[0])
+
+        # Fill spans
+        for i in range(0, len(intersections), 2):
+            if i + 1 < len(intersections):
+                x_start, color_start = intersections[i]
+                x_end, color_end = intersections[i + 1]
+
+                if x_end == x_start:
+                    continue
+
+                for x in range(int(x_start), int(x_end) + 1):
+                    t = (x - x_start) / (x_end - x_start)
+                    color = color_interpolate(color_start, color_end, t)
+                    set_pixel(surface, x, y, color)
+
+
+def scanline_polygon(surface, points, fill_color):
+    """
+    Scan-line fill a polygon defined by a list of points
+    on the given surface.
+    """
+    ys = [p[1] for p in points]
+    y_min = int(min(ys))
+    y_max = int(max(ys))
+
+    n = len(points)
+
+    for y in range(y_min, y_max):
+        intersections = []
+
+        for i in range(n):
+            x0, y0 = points[i]
+            x1, y1 = points[(i + 1) % n]
+
+            # Ignore horizontal edges
+            if y0 == y1:
+                continue
+
+            # Ensure y0 < y1
+            if y0 > y1:
+                x0, y0, x1, y1 = x1, y1, x0, y0
+
+            # Scanline inclusion rule
+            if y < y0 or y >= y1:
+                continue
+
+            # Edge interpolation
+            t = (y - y0) / (y1 - y0)
+            x = x0 + t * (x1 - x0)
+
+            intersections.append(x)
+
+        # Sort intersections by x
+        intersections.sort()
+
+        # Fill spans
+        for i in range(0, len(intersections), 2):
+            if i + 1 < len(intersections):
+                x_start = int(intersections[i])
+                x_end = int(intersections[i + 1])
+
+                for x in range(x_start, x_end + 1):
+                    set_pixel(surface, x, y, fill_color)

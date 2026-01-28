@@ -1,25 +1,63 @@
-def indentity():
+def identity():
+    """
+    Create a 3x3 identity matrix.
+
+    Returns:
+        list[list[int]]: A 3x3 identity matrix.
+    """
     return [
-        [1, 0 ,0],
-        [0, 1 ,0],
-        [0, 0 ,1],
+        [1, 0, 0],
+        [0, 1, 0],
+        [0, 0, 1],
     ]
 
+
 def translation(tx, ty):
+    """
+    Create a 3x3 translation matrix.
+
+    Args:
+        tx (float): Translation in x-direction.
+        ty (float): Translation in y-direction.
+
+    Returns:
+        list[list[float]]: A 3x3 translation matrix.
+    """
     return [
         [1, 0, tx],
         [0, 1, ty],
         [0, 0, 1],
     ]
 
+
 def scaling(sx, sy):
+    """
+    Create a 3x3 scaling matrix.
+
+    Args:
+        sx (float): Scale factor in x-direction.
+        sy (float): Scale factor in y-direction.
+
+    Returns:
+        list[list[float]]: A 3x3 scaling matrix.
+    """
     return [
         [sx, 0, 0],
         [0, sy, 0],
         [0, 0, 1],
     ]
 
+
 def rotation(angle_degrees):
+    """
+    Create a 3x3 rotation matrix.
+
+    Args:
+        angle_degrees (float): Rotation angle in degrees.
+
+    Returns:
+        list[list[float]]: A 3x3 rotation matrix.
+    """
     import math
     angle_radians = math.radians(angle_degrees)
     cos_a = math.cos(angle_radians)
@@ -30,10 +68,28 @@ def rotation(angle_degrees):
         [0, 0, 1],
     ]
 
+
 def create_transformation():
-    return indentity()
+    """
+    Create an identity transformation matrix.
+
+    Returns:
+        list[list[int]]: A 3x3 identity matrix.
+    """
+    return identity()
+
 
 def multiply_matrices(a, b):
+    """
+    Multiply two matrices.
+
+    Args:
+        a (list[list[float]]): First matrix (m x n).
+        b (list[list[float]]): Second matrix (n x p).
+
+    Returns:
+        list[list[float]]: Result matrix (m x p).
+    """
     result = [[0 for _ in range(len(b[0]))] for _ in range(len(a))]
     for i in range(len(a)):
         for j in range(len(b[0])):
@@ -41,90 +97,112 @@ def multiply_matrices(a, b):
                 result[i][j] += a[i][k] * b[k][j]
     return result
 
-def apply_transformation(points:list[list[int]], matrix:list[list[int]]):
+
+def apply_transformation(points: list[list[int]], matrix: list[list[int]]):
+    """
+    Apply transformation matrix to a list of points.
+
+    Args:
+        points (list[tuple[int, int]]): List of (x, y) points.
+        matrix (list[list[int]]): 3x3 transformation matrix.
+
+    Returns:
+        list[tuple[float, float]]: List of transformed points.
+    """
     new_points = list()
     for x, y in points:
         transformed = multiply_matrices(matrix, [[x], [y], [1]])
         new_points.append((transformed[0][0], transformed[1][0]))
     return new_points
 
-def windown_viewport(janela, viewport):
+
+def window_viewport(window, viewport):
     """
-    Cria matriz de transformação de janela (mundo) para viewport (tela).
-    
+    Create a transformation matrix from window (world) to viewport (screen).
+
+    Steps:
+    1. Translate window to origin
+    2. Scale to viewport dimensions
+    3. Translate to viewport position
+
     Args:
-        janela: (xmin, ymin, xmax, ymax) - coordenadas do mundo
-        viewport: (xmin, ymin, xmax, ymax) - coordenadas da viewport na tela
-        invert_y: Se True, inverte o eixo Y (necessário para Pygame)
-    
+        window (tuple): (xmin, ymin, xmax, ymax) - world coordinates
+        viewport (tuple): (xmin, ymin, xmax, ymax) - viewport coordinates on screen
+
     Returns:
-        Matriz de transformação 3x3
+        list[list[float]]: 3x3 transformation matrix
     """
-    
-    # 1. Translada janela para origem
-    Wxmin, Wymin, _, _ = janela
-    Vxmin, Vymin, _, _ = viewport
+    # Extract coordinates
+    w_xmin, w_ymin, _, _ = window
+    v_xmin, v_ymin, _, _ = viewport
 
-    m = indentity()
-    
-    sx, sy = get_scale_factors(janela, viewport) 
+    # Get scale factors
+    sx, sy = get_scale_factors(window, viewport)
 
-    m = multiply_matrices(translation(-Wxmin, -Wymin), m)
+    # Create transformation matrix
+    m = identity()
 
-    # 2. Escala para dimensões da viewport
+    # 1. Translate window to origin
+    m = multiply_matrices(translation(-w_xmin, -w_ymin), m)
+
+    # 2. Scale to viewport dimensions
     m = multiply_matrices(scaling(sx, sy), m)
 
-    # 3. Translada para posição da viewport
-    
-    m = multiply_matrices(translation(Vxmin, Vymin), m)
+    # 3. Translate to viewport position
+    m = multiply_matrices(translation(v_xmin, v_ymin), m)
 
     return m
 
+
 def transform_point(x, y, matrix):
     """
-    Aplica transformação em um único ponto.
-    
+    Apply transformation to a single point.
+
     Args:
-        x, y: coordenadas do ponto
-        matrix: matriz de transformação 3x3
-    
+        x (float): x-coordinate of the point.
+        y (float): y-coordinate of the point.
+        matrix (list[list[float]]): 3x3 transformation matrix.
+
     Returns:
-        Tupla (x', y') com coordenadas transformadas
+        tuple[float, float]: (x', y') transformed coordinates.
     """
     result = multiply_matrices(matrix, [[x], [y], [1]])
     return result[0][0], result[1][0]
 
-def get_scale_factors(janela, viewport):
+
+def get_scale_factors(window, viewport):
     """
-    Calcula os fatores de escala de uma transformação janela-viewport.
-    
+    Calculate scale factors for window-to-viewport transformation.
+
     Args:
-        janela: (xmin, ymin, xmax, ymax) - coordenadas do mundo
-        viewport: (xmin, ymin, xmax, ymax) - coordenadas da viewport
-    
+        window (tuple): (xmin, ymin, xmax, ymax) - world coordinates
+        viewport (tuple): (xmin, ymin, xmax, ymax) - viewport coordinates
+
     Returns:
-        Tupla (sx, sy) com fatores de escala
+        tuple[float, float]: (sx, sy) scale factors
     """
-    Wxmin, Wymin, Wxmax, Wymax = janela
-    Vxmin, Vymin, Vxmax, Vymax = viewport
-    
-    sx = (Vxmax - Vxmin) / (Wxmax - Wxmin)
-    sy = (Vymax - Vymin) / (Wymax - Wymin)
-    
+    w_xmin, w_ymin, w_xmax, w_ymax = window
+    v_xmin, v_ymin, v_xmax, v_ymax = viewport
+
+    sx = (v_xmax - v_xmin) / (w_xmax - w_xmin)
+    sy = (v_ymax - v_ymin) / (w_ymax - w_ymin)
+
     return sx, sy
+
 
 def transform_dimension(width, height, sx, sy):
     """
-    Transforma dimensões (largura, altura) aplicando apenas escala.
-    Use esta função para transformar tamanhos, raios, larguras, etc.
-    NÃO use para coordenadas de pontos!
-    
+    Transform dimensions (width, height) by applying scale only.
+    Use this function for transforming sizes, radii, widths, etc.
+    DO NOT use for point coordinates!
+
     Args:
-        width: largura/dimensão em x
-        height: altura/dimensão em y
-        sx, sy: fatores de escala
-    
+        width (float): Width/dimension in x-direction.
+        height (float): Height/dimension in y-direction.
+        sx (float): Scale factor in x-direction.
+        sy (float): Scale factor in y-direction.
+
     Returns:
-        Tupla (width', height') com dimensões transformadas
+        tuple[float, float]: (width', height') transformed dimensions.
     """
     return abs(width * sx), abs(height * sy)
