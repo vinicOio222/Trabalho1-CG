@@ -1,4 +1,5 @@
 from graphic.shapes import set_pixel
+from graphic.clipping import space_code, INSIDE
 
 
 def circle_scanline(surface, xc, yc, r, fill_color, border_color):
@@ -229,16 +230,87 @@ def scanline_polygon(surface, points, fill_color):
                     set_pixel(surface, x, y, fill_color)
 
 
-def scanline_texture(surface, points, uvs, texture, tex_w, tex_h):
+def scanline_polygon_clipping(surface, points, fill_color, xmin, ymin, xmax, ymax):
     """
-    Scan-line fill a polygon with texture mapping.
+    Scan-line fill a polygon defined by a list of points
+    on the given surface with clipping to a rectangular window.
+    
+    Args:
+        surface: The surface to draw on.
+        points: List of (x, y) points defining the polygon.
+        fill_color: Color to fill the polygon.
+        xmin (float): Minimum x-coordinate of the clipping window.
+        ymin (float): Minimum y-coordinate of the clipping window.
+        xmax (float): Maximum x-coordinate of the clipping window.
+        ymax (float): Maximum y-coordinate of the clipping window.
     """
-    n = len(points)
-
     ys = [p[1] for p in points]
     y_min = int(min(ys))
     y_max = int(max(ys))
 
+    # Clip y range to window - ensure we don't go beyond ymax
+    y_min = max(y_min, int(ymin))
+    y_max = min(y_max, int(ymax))
+
+    n = len(points)
+
+    for y in range(y_min, y_max):
+        intersections = []
+
+        for i in range(n):
+            x0, y0 = points[i]
+            x1, y1 = points[(i + 1) % n]
+
+            # Ignore horizontal edges
+            if y0 == y1:
+                continue
+
+            # Ensure y0 < y1
+            if y0 > y1:
+                x0, y0, x1, y1 = x1, y1, x0, y0
+
+            # Scanline inclusion rule
+            if y < y0 or y >= y1:
+                continue
+
+            # Edge interpolation
+            t = (y - y0) / (y1 - y0)
+            x = x0 + t * (x1 - x0)
+
+            intersections.append(x)
+
+        # Sort intersections by x
+        intersections.sort()
+
+        # Fill spans with clipping
+        for i in range(0, len(intersections), 2):
+            if i + 1 < len(intersections):
+                x_start = int(intersections[i])
+                x_end = int(intersections[i + 1])
+
+                # Clip x range to window
+                x_start = max(x_start, int(xmin))
+                x_end = min(x_end, int(xmax))
+
+                for x in range(x_start, x_end + 1):
+                    # Double check if pixel is inside clipping window
+                    if space_code(x, y, xmin, ymin, xmax, ymax) == INSIDE:
+                        set_pixel(surface, x, y, fill_color)
+
+
+def scanline_texture(surface, points, uvs, texture, tex_w, tex_h):
+    """
+    Scan-line fill a polygon with texture mapping.
+    """
+    # Number of polygon vertices
+    n = len(points)
+
+    # Get y-coordinate bounds of the polygon
+    ys = [p[1] for p in points]
+    y_min = int(min(ys))
+    y_max = int(max(ys))
+
+    # Iterate over each y-coordinate within the polygon's bounding box
     for y in range(y_min, y_max):
         inter = []
 
@@ -261,6 +333,7 @@ def scanline_texture(surface, points, uvs, texture, tex_w, tex_h):
 
             t = (y - y0) / (y1 - y0)
 
+            # Edge interpolation
             x = x0 + t * (x1 - x0)
             u = u0 + t * (u1 - u0)
             v = v0 + t * (v1 - v0)
@@ -269,6 +342,7 @@ def scanline_texture(surface, points, uvs, texture, tex_w, tex_h):
 
         inter.sort(key=lambda i: i[0])
 
+        # Fill spans with texture mapping
         for i in range(0, len(inter), 2):
             if i + 1 >= len(inter):
                 continue

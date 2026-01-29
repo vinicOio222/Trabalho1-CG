@@ -13,7 +13,7 @@ class BasketBall:
     FRICTION = 0.98         # Horizontal rolling friction
     ROLL_THRESHOLD = 0.5    # Min vertical speed to stop bouncing
 
-    def __init__(self, xc, yc):
+    def __init__(self, xc, yc, r=15, fill_color=(255, 165, 0), border_color=(0, 0, 0)):
         """
         Initialize a basketball object.
 
@@ -26,15 +26,15 @@ class BasketBall:
         self.xc = xc
         self.yc = yc
         self.velocity = [0.0, 0.0]
-        self.r = 15  # Radius
+        self.r = r  # Radius
         self.is_shot = False
         self.is_dragging = False
         self.drag_start = None
         self.angle = 0.0  # Current angle in radians
         self.angular_velocity = 0.0  # Angular velocity
         self.colors = {
-            "fill": (255, 165, 0),  # Orange
-            "border_and_details": (0, 0, 0)  # Black
+            "fill": fill_color,  # Orange
+            "border_and_details": border_color  # Black
         }
 
     def _rotate_point(self, x, y):

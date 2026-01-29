@@ -67,35 +67,41 @@ class Screen:
         ground_mini_start = transform_point(ground.points[0][0], ground.points[0][1], world_to_minimap)
         ground_mini_end = transform_point(ground.points[1][0], ground.points[1][1], world_to_minimap)
 
+        # Get minimap clipping window coordinates
+        xmin, ymin, xmax, ymax = minimap_bounds[0], minimap_bounds[1], minimap_bounds[0] + minimap_bounds[2] - 1, minimap_bounds[1] + minimap_bounds[3] - 1
+
         # Draw on minimap (simplified versions)
-        # Ground on minimap
-        draw_polygon(
+        # Ground on minimap (uses polygon clipping)
+        draw_polygon_clipping(
             surface,
             [
                 (int(ground_mini_start[0]), int(ground_mini_start[1])),
                 (int(ground_mini_end[0]), int(ground_mini_end[1])),
-                (int(ground_mini_end[0]), minimap_bounds[3]),
-                (int(ground_mini_start[0]), minimap_bounds[3])
+                (int(ground_mini_end[0]), ymax),
+                (int(ground_mini_start[0]), ymax)
             ],
+            (xmin, ymin, xmax, ymax),
             ground.colors["fill"]
         )
-        scanline_polygon(
+        scanline_polygon_clipping(
             surface,
             [
                 (int(ground_mini_start[0]), int(ground_mini_start[1])),
                 (int(ground_mini_end[0]), int(ground_mini_end[1])),
-                (int(ground_mini_end[0]), minimap_bounds[3]),
-                (int(ground_mini_start[0]), minimap_bounds[3])
+                (int(ground_mini_end[0]), ymax),
+                (int(ground_mini_start[0]), ymax)
             ],
             ground.colors["fill"],
+            xmin, ymin, xmax, ymax
         )
 
-        # Ball on minimap
-        draw_circle(
+        # Ball on minimap (uses circle clipping)
+        draw_circle_clipping(
             surface,
             int(ball_mini_x),
             int(ball_mini_y),
             max(1, ball_mini_r),  # Use scaled radius, minimum 1 pixel
+            xmin, ymin, xmax, ymax,
             ball.colors["fill"]
         )
         circle_scanline(
@@ -107,23 +113,42 @@ class Screen:
             ball.colors["border_and_details"]
         )
 
-        # Hoop on minimap (outer ellipse)
-        draw_ellipse(
+        # Pole on minimap (draw behind the hoop)
+        pole_top_y = hoop.yc - hoop.b_outer
+        pole_mini_top_x, pole_mini_top_y = transform_point(hoop.xc + hoop.a_outer, pole_top_y, world_to_minimap)
+        pole_mini_top_outer_x, pole_mini_top_outer_y = transform_point(hoop.xc + hoop.a_outer + hoop.pole_width, pole_top_y, world_to_minimap)
+        pole_mini_bottom_x, pole_mini_bottom_y = transform_point(hoop.xc + hoop.a_outer, hoop.ground_y, world_to_minimap)
+        pole_mini_bottom_outer_x, pole_mini_bottom_outer_y = transform_point(hoop.xc + hoop.a_outer + hoop.pole_width, hoop.ground_y, world_to_minimap)
+        
+        pole_mini_points = [
+            (int(pole_mini_top_x), int(pole_mini_top_y)),
+            (int(pole_mini_top_outer_x), int(pole_mini_top_outer_y)),
+            (int(pole_mini_bottom_outer_x), int(pole_mini_bottom_outer_y)),
+            (int(pole_mini_bottom_x), int(pole_mini_bottom_y))
+        ]
+        
+        draw_polygon_clipping(surface, pole_mini_points, (xmin, ymin, xmax, ymax), hoop.colors["border"])
+        scanline_polygon_clipping(surface, pole_mini_points, hoop.colors["pole"], xmin, ymin, xmax, ymax)
+
+        # Hoop on minimap (outer ellipse - uses ellipse clipping)
+        draw_ellipse_clipping(
             surface,
             int(hoop_mini_x),
             int(hoop_mini_y),
             int(hoop_mini_a_outer),
             int(hoop_mini_b_outer),
+            xmin, ymin, xmax, ymax,
             hoop.colors["fill"]
         )
 
-        # Hoop on minimap (inner ellipse)
-        draw_ellipse(
+        # Hoop on minimap (inner ellipse - uses ellipse clipping)
+        draw_ellipse_clipping(
             surface,
             int(hoop_mini_x),
             int(hoop_mini_y),
             int(hoop_mini_a_inner),
             int(hoop_mini_b_inner),
+            xmin, ymin, xmax, ymax,
             hoop.colors["fill"]
         )
 
@@ -143,11 +168,11 @@ class Screen:
         # Show current visible area on minimap (optional)
         viewport_corners = [
             (0, 0),
-            (WIDTH, 0),
-            (WIDTH, HEIGHT),
-            (0, HEIGHT)
+            (WIDTH-1, 0),
+            (WIDTH-1, HEIGHT-1),
+            (0, HEIGHT-1)
         ]
-
-        minimap_corners = [transform_point(x, y, world_to_minimap) for x, y in viewport_corners]
-        if len(minimap_corners) >= 2:
-            draw_polygon(surface, minimap_corners, (0, 0, 0))
+        
+        # Draw minimap border to show clipping boundaries
+        minimap_border = [(xmin, ymin), (xmax, ymin), (xmax, ymax), (xmin, ymax)]
+        draw_polygon(surface, minimap_border, (255, 255, 255))
