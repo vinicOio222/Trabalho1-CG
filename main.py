@@ -20,8 +20,8 @@ def main():
 
     # Initialize game objects
     ball = BasketBall(150, 400)
-    hoop = BasketHoop(650, 200)
-    ground = Ground(580, 800, 600)
+    hoop = BasketHoop(650, 200, 580)
+    ground = Ground(580, 900, 600)
     score_board = ScoreBoard()
     
     # Game state variables

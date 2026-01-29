@@ -17,12 +17,12 @@ Nada de usar funções prontas exceto as que fazem o set pixel, que exibem matri
 - viewport com minimap
 - cenário (provavelmente um png do ceu azul e um chão)
 - textura (chão com textura)
+- Menu inicial
+- Função scanline_floodfill (falta adicionar no menu e no título)
+- Falta clipping no minimap
+- clipping (is_out_of_bound, mas tem que melhorar pra usar as funções do professor)
 
 ### Falta:
-- Falta clipping no minimap
 - personagem
 - boneco pulando (animação)
 - Viewport com zoom (minimapa focando a cara do personagem, usando clipping)
-- Menu inicial
-- Função scanline_floodfill (falta adicionar no menu e no título)
-- clipping (is_out_of_bound, mas tem que melhorar pra usar as funções do professor)
