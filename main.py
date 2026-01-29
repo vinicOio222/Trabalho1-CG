@@ -1,5 +1,4 @@
 """Main module for the basket ball game application."""
-from time import sleep
 import pygame
 from core.screen import Screen
 from game.ball import BasketBall
@@ -17,7 +16,7 @@ def main():
     # Initialize game objects
     ball = BasketBall(150, 400)
     hoop = BasketHoop(650, 200)
-    ground = Ground(560, 800, 600)
+    ground = Ground(580, 800, 600)
     score_board = ScoreBoard()
     
     # Game state variables
