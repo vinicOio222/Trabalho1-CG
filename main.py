@@ -5,6 +5,7 @@ from game.ball import BasketBall
 from game.hoop import BasketHoop
 from game.score_board import ScoreBoard
 from game.ground import Ground
+from menu.start_screen import StartScreen
 
 
 def main():
@@ -12,6 +13,10 @@ def main():
     screen = Screen()
     canvas = screen.canvas
     clock = pygame.time.Clock()
+    
+    # Initialize start screen
+    start_screen = StartScreen()
+    show_start_screen = True
 
     # Initialize game objects
     ball = BasketBall(150, 400)
@@ -24,12 +29,19 @@ def main():
     game_over = False
     ground_contact_limit = 0
     MAX_GROUND_TIME = 30  # Frames allowed on ground before penalty
+    clock_ticks = 60  # Game update rate
     
     running = True
     while running:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
+            
+            # Handle start screen events
+            if show_start_screen:
+                if start_screen.handle_event(event):
+                    show_start_screen = False
+                continue
             
             # Handle mouse events for slingshot
             elif event.type == pygame.MOUSEBUTTONDOWN and not game_over:
@@ -55,6 +67,14 @@ def main():
                     score_board.lives = 5
                     scored = False
                     game_over = False
+
+        # Show start screen
+        if show_start_screen:
+            start_screen.update_animation()
+            start_screen.draw(canvas)
+            screen.update()
+            clock.tick(60)
+            continue
 
         # Update ball physics
         if ball.is_shot:
@@ -160,7 +180,7 @@ def main():
             canvas.blit(text, text_rect)
 
         screen.update()
-        clock.tick(60)
+        clock.tick(clock_ticks)
 
     pygame.quit()
 
