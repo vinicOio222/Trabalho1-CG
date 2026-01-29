@@ -4,8 +4,14 @@ import math
 from graphic.scan_line import circle_scanline
 from graphic.shapes import draw_circle, draw_line_bresenham, draw_arc
 
+
 class BasketBall:
     """Class representing a basketball."""
+
+    # --- Physics constants (arcade-tuned) ---
+    RESTITUTION = 0.65      # Bounce energy retention
+    FRICTION = 0.98         # Horizontal rolling friction
+    ROLL_THRESHOLD = 0.5    # Min vertical speed to stop bouncing
 
     def __init__(self, xc, yc):
         """
@@ -19,13 +25,13 @@ class BasketBall:
         self.initial_y = yc
         self.xc = xc
         self.yc = yc
-        self.velocity = [0, 0]
+        self.velocity = [0.0, 0.0]
         self.r = 15  # Radius
         self.is_shot = False
         self.is_dragging = False
         self.drag_start = None
-        self.angle = 0  # Current angle in radians
-        self.angular_velocity = 0  # Angular velocity
+        self.angle = 0.0  # Current angle in radians
+        self.angular_velocity = 0.0  # Angular velocity
         self.colors = {
             "fill": (255, 165, 0),  # Orange
             "border_and_details": (0, 0, 0)  # Black
@@ -123,29 +129,64 @@ class BasketBall:
         self.velocity = [vx, vy]
         self.is_shot = True
 
-    def update(self, gravity=0.5):
+    def update(self, gravity=0.5, ground_y=None):
         """
         Update the position of the basketball based on its velocity and gravity.
 
         Args:
             gravity (float): Gravity acceleration value. Default is 0.5.
+            ground_y (float | None): Y coordinate of the ground.
         """
-        if self.is_shot:
-            self.velocity[1] += gravity
-            self.xc += self.velocity[0]
-            self.yc += self.velocity[1]
-            self.angle += self.angular_velocity
+        if not self.is_shot:
+            return
+
+        # Apply gravity
+        self.velocity[1] += gravity
+
+        # Integrate motion
+        self.xc += self.velocity[0]
+        self.yc += self.velocity[1]
+
+        # Apply rotation (visual only)
+        self.angle += self.angular_velocity
+
+        # Ground collision
+        if ground_y is not None:
+            self._resolve_ground_collision(ground_y)
+
+    def _resolve_ground_collision(self, ground_y):
+        """
+        Resolve collision between the ball and the ground.
+
+        Args:
+            ground_y (float): Y coordinate of the ground surface.
+        """
+        if self.yc + self.r >= ground_y:
+            # Position correction
+            self.yc = ground_y - self.r
+
+            # Bounce only if falling
+            if self.velocity[1] > 0:
+                self.velocity[1] = -self.velocity[1] * self.RESTITUTION
+
+            # Rolling friction
+            self.velocity[0] *= self.FRICTION
+
+            # Stop bouncing -> rolling
+            if abs(self.velocity[1]) < self.ROLL_THRESHOLD:
+                self.velocity[1] = 0
+                self.angular_velocity = self.velocity[0] * 0.02
 
     def reset(self):
         """Reset the ball to its initial position and state."""
         self.xc = self.initial_x
         self.yc = self.initial_y
-        self.velocity = [0, 0]
+        self.velocity = [0.0, 0.0]
         self.is_shot = False
         self.is_dragging = False
         self.drag_start = None
-        self.angle = 0  # Reset angle
-        self.angular_velocity = 0
+        self.angle = 0.0
+        self.angular_velocity = 0.0
 
     def is_out_of_bounds(self, width, height):
         """
@@ -158,8 +199,10 @@ class BasketBall:
         Returns:
             bool: True if ball is out of bounds, False otherwise.
         """
-        return (self.xc < -50 or self.xc > width + 50 or
-                self.yc < -50 or self.yc > height + 50)
+        return (
+            self.xc < -50 or self.xc > width + 50 or
+            self.yc < -50 or self.yc > height + 50
+        )
 
     def start_drag(self, mouse_x, mouse_y):
         """
@@ -172,10 +215,9 @@ class BasketBall:
         Returns:
             bool: True if drag started successfully, False otherwise.
         """
-        # Check if mouse is near the ball
         dx = mouse_x - self.xc
         dy = mouse_y - self.yc
-        distance = (dx**2 + dy**2)**0.5
+        distance = (dx ** 2 + dy ** 2) ** 0.5
         if distance <= self.r * 2 and not self.is_shot:
             self.is_dragging = True
             self.drag_start = (self.xc, self.yc)
@@ -191,10 +233,9 @@ class BasketBall:
             mouse_y (float): Current mouse y-coordinate.
         """
         if self.is_dragging:
-            # Limit drag distance
             dx = self.initial_x - mouse_x
             dy = self.initial_y - mouse_y
-            distance = (dx**2 + dy**2)**0.5
+            distance = (dx ** 2 + dy ** 2) ** 0.5
             max_distance = 100
             if distance > max_distance:
                 ratio = max_distance / distance
@@ -206,7 +247,6 @@ class BasketBall:
     def release_drag(self):
         """Release the slingshot and shoot the ball."""
         if self.is_dragging:
-            # Calculate velocity based on drag distance
             vx = (self.initial_x - self.xc) * 0.3
             vy = (self.initial_y - self.yc) * 0.3
             self.angular_velocity = vx * 0.01
