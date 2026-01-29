@@ -26,7 +26,7 @@ class StartScreen:
             # 1. Place a music file (mp3, ogg, or wav) in the project directory
             # 2. Uncomment the lines below and update the path
             pygame.mixer.music.load("menu/spacejam.mp3")  # Change to your music file path
-            pygame.mixer.music.set_volume(0.5)  # Set volume (0.0 to 1.0)
+            pygame.mixer.music.set_volume(1)  # Set volume (0.0 to 1.0)
             pygame.mixer.music.play(-1)  # Loop indefinitely (-1) or specify number of times
         except Exception as e:
             print(f"Could not load music: {e}")
