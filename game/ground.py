@@ -29,15 +29,6 @@ class Ground:
             "fill": (80, 160, 80)     # Light Green
         }
 
-    def blit_texture(self):
-        """
-        Blit the ground texture onto the background surface.
-        """
-        tex_w, tex_h = self.texture.get_size()
-        for x in range(0, self.background.get_width(), tex_w):
-            for y in range(0, self.background.get_height(), tex_h):
-                self.background.blit(self.texture, (x, y))
-
     def draw(self, surface):
         """
         Draw the ground polygon outline and fill it using scanline.
