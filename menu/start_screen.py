@@ -1,7 +1,9 @@
 """Module for the start screen with title animation and music."""
 import pygame
-import math
-from graphic.shapes import draw_circle, draw_polygon, set_pixel
+
+from game.ball import BasketBall
+from graphic.scan_line import circle_scanline
+from graphic.shapes import draw_circle, draw_polygon
 from graphic.floodfill import flood_fill
 
 
@@ -59,12 +61,13 @@ class StartScreen:
         star_positions = [
             (100, 80), (250, 120), (600, 90), (720, 150),
             (150, 450), (680, 480), (50, 300), (750, 350),
-            (400, 50), (300, 500)
+            (400, 50), 
         ]
         
         for x, y in star_positions:
             # Draw small circles as stars
-            draw_circle(surface, x, y, 2, (255, 255, 200))
+            draw_circle(surface, x, y, 4, (255, 255, 200))
+            circle_scanline(surface, x, y, 4, (255, 255, 200), (255, 255, 255))
     
     def draw_title(self, surface):
         """Draw the game title with animation."""
@@ -91,8 +94,13 @@ class StartScreen:
         surface.blit(subtitle_surface, subtitle_rect)
         
         # Draw basketball icon near title
-        self._draw_basketball_icon(surface, self.width // 2 - 180, self.height // 3, color_value)
-        self._draw_basketball_icon(surface, self.width // 2 + 180, self.height // 3, color_value)
+        self._draw_basketball_icon(surface, self.width // 2 - 180, 1, color_value)
+        self._draw_basketball_icon(surface, self.width, self.height // 3, color_value)
+
+        self._draw_basketball_icon(surface, 1, self.height - 180, color_value)
+        self._draw_basketball_icon(surface, self.width // 2 + 270, self.height, color_value)
+
+        self._draw_basketball_icon(surface, self.width // 2, self.height // 2 + 60 , color_value)
     
     def _draw_basketball_icon(self, surface, x, y, alpha):
         """Draw a small basketball icon using the shapes functions."""
@@ -100,24 +108,8 @@ class StartScreen:
         color = (min(255, alpha + 100), min(165, int(alpha * 0.65)), 0)  # Orange color
         
         # Draw basketball circle
-        draw_circle(surface, x, y, r, color)
-        
-        # Fill the basketball
-        if alpha > 50:  # Only fill when visible enough
-            flood_fill(surface, x, y, color, color)
-            
-            # Draw basketball lines
-            line_color = (0, 0, 0)
-            # Vertical line
-            points_v = [(x, y - r), (x, y + r)]
-            draw_polygon(surface, points_v, line_color)
-            
-            # Curved lines (approximated with points)
-            for angle in [60, 120, 240, 300]:
-                rad = math.radians(angle)
-                x1 = int(x + r * math.cos(rad))
-                y1 = int(y + r * math.sin(rad))
-                points = [(x, y - r), (x1, y1), (x, y + r)]
+        ball = BasketBall(x, y, r, color, (20, 30, 80) )
+        ball.draw(surface)
     
     def draw_instructions(self, surface):
         """Draw instructions for starting the game."""
@@ -163,7 +155,7 @@ class StartScreen:
                 self.start_pressed = True
                 # Stop music when starting
                 try:
-                    pygame.mixer.music.fadeout(1000)  # Fade out over 1 second
+                    pygame.mixer.music.set_volume(0.2)  # Fade out over 1 second
                 except:
                     pass
                 return True
