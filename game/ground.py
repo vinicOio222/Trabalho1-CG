@@ -1,5 +1,6 @@
+import pygame
 from graphic.shapes import draw_polygon
-from graphic.scan_line import scanline_polygon
+from graphic.scan_line import scanline_texture
 
 class Ground:
     """
@@ -16,6 +17,7 @@ class Ground:
             width (int): Screen width.
             height (int): Screen height.
         """
+        self.texture = pygame.image.load("game/textures/grass.jpg").convert()
         self.points = [
             (0, ground_y),
             (width, ground_y),
@@ -27,6 +29,15 @@ class Ground:
             "fill": (80, 160, 80)     # Light Green
         }
 
+    def blit_texture(self):
+        """
+        Blit the ground texture onto the background surface.
+        """
+        tex_w, tex_h = self.texture.get_size()
+        for x in range(0, self.background.get_width(), tex_w):
+            for y in range(0, self.background.get_height(), tex_h):
+                self.background.blit(self.texture, (x, y))
+
     def draw(self, surface):
         """
         Draw the ground polygon outline and fill it using scanline.
@@ -34,5 +45,16 @@ class Ground:
         # Draw polygon outline
         draw_polygon(surface, self.points, self.colors["border"])
 
-        # Fill polygon interior
-        scanline_polygon(surface, self.points, self.colors["fill"])
+        # Setting up texture UVs and repeating
+        tex_w, tex_h = self.texture.get_size()
+        repeat_x = 8
+        repeat_y = 4
+
+        uvs = [
+            (0, 0),
+            (repeat_x, 0),
+            (repeat_x, repeat_y),
+            (0, repeat_y)
+        ]
+        # Fill polygon with texture using scanline texture fill
+        scanline_texture(surface, self.points, uvs, self.texture, tex_w, tex_h)
