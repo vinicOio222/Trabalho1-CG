@@ -5,7 +5,7 @@ Um jogo arcade de basquete desenvolvido do zero usando algoritmos clássicos de 
 # Menu 
 ![Basketball Arcade](/public/start_menu.png)
 # In-game
-![Basketball Arcade](/public/in-game.pngstatusstat)
+![Basketball Arcade](/public/in-game.png)
 
 ## 📋 Descrição
 
