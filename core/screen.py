@@ -3,6 +3,7 @@ import pygame
 
 from animation.animation import *
 from game.ball import BasketBall
+from game.ground import Ground
 from game.hoop import BasketHoop
 from graphic.shapes import *
 from graphic.scan_line import *
@@ -37,7 +38,7 @@ class Screen:
         """Update the display."""
         pygame.display.flip()
 
-    def display_minimap(self, surface, ball:BasketBall, hoop:BasketHoop): # noqa
+    def display_minimap(self, surface, ball:BasketBall, hoop:BasketHoop, ground: Ground): # noqa
         """
         Render a minimap showing the ball and hoop positions.
 
@@ -61,8 +62,34 @@ class Screen:
         # Transform hoop dimensions (uses transform_dimension, not transform_point!)
         hoop_mini_a_outer, hoop_mini_b_outer = transform_dimension(hoop.a_outer, hoop.b_outer, sx, sy)
         hoop_mini_a_inner, hoop_mini_b_inner = transform_dimension(hoop.a_inner, hoop.b_inner, sx, sy)
+        # Transform ground points
+
+        ground_mini_start = transform_point(ground.points[0][0], ground.points[0][1], world_to_minimap)
+        ground_mini_end = transform_point(ground.points[1][0], ground.points[1][1], world_to_minimap)
 
         # Draw on minimap (simplified versions)
+        # Ground on minimap
+        draw_polygon(
+            surface,
+            [
+                (int(ground_mini_start[0]), int(ground_mini_start[1])),
+                (int(ground_mini_end[0]), int(ground_mini_end[1])),
+                (int(ground_mini_end[0]), minimap_bounds[3]),
+                (int(ground_mini_start[0]), minimap_bounds[3])
+            ],
+            ground.colors["fill"]
+        )
+        scanline_polygon(
+            surface,
+            [
+                (int(ground_mini_start[0]), int(ground_mini_start[1])),
+                (int(ground_mini_end[0]), int(ground_mini_end[1])),
+                (int(ground_mini_end[0]), minimap_bounds[3]),
+                (int(ground_mini_start[0]), minimap_bounds[3])
+            ],
+            ground.colors["fill"],
+        )
+
         # Ball on minimap
         draw_circle(
             surface,

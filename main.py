@@ -1,4 +1,5 @@
 """Main module for the basket ball game application."""
+from time import sleep
 import pygame
 from core.screen import Screen
 from game.ball import BasketBall
@@ -22,6 +23,8 @@ def main():
     # Game state variables
     scored = False
     game_over = False
+    ground_contact_limit = 0
+    MAX_GROUND_TIME = 30  # Frames allowed on ground before penalty
     
     running = True
     while running:
@@ -56,7 +59,7 @@ def main():
 
         # Update ball physics
         if ball.is_shot:
-            ball.update(gravity=0.5)
+            ball.update(gravity=0.5, ground_y=ground.points[0][1])
             
             # Check if ball scored
             if not scored and hoop.check_score(ball):
@@ -73,10 +76,21 @@ def main():
                 ball.reset()
                 scored = False
 
+            elif ball.yc >= ground.points[0][1] - ball.r:
+                ground_contact_limit += 1
+                if ground_contact_limit >= MAX_GROUND_TIME:
+                    if not scored:
+                        score_board.lose_life()
+                        if score_board.is_game_over():
+                            game_over = True
+                    ball.reset()
+                    scored = False
+                    ground_contact_limit = 0
+
         # Screen rendering
         screen.clear()
         ground.draw(canvas)
-        screen.display_minimap(canvas, ball, hoop)
+        screen.display_minimap(canvas, ball, hoop, ground)
 
         # Draw game objects
         hoop.draw(canvas)
