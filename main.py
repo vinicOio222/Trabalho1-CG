@@ -1,5 +1,4 @@
 """Main module for the basket ball game application."""
-from time import sleep
 import pygame
 from core.screen import Screen
 from game.ball import BasketBall
