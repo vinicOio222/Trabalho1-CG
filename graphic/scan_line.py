@@ -302,12 +302,15 @@ def scanline_texture(surface, points, uvs, texture, tex_w, tex_h):
     """
     Scan-line fill a polygon with texture mapping.
     """
+    # Number of polygon vertices
     n = len(points)
 
+    # Get y-coordinate bounds of the polygon
     ys = [p[1] for p in points]
     y_min = int(min(ys))
     y_max = int(max(ys))
 
+    # Iterate over each y-coordinate within the polygon's bounding box
     for y in range(y_min, y_max):
         inter = []
 
@@ -330,6 +333,7 @@ def scanline_texture(surface, points, uvs, texture, tex_w, tex_h):
 
             t = (y - y0) / (y1 - y0)
 
+            # Edge interpolation
             x = x0 + t * (x1 - x0)
             u = u0 + t * (u1 - u0)
             v = v0 + t * (v1 - v0)
@@ -338,6 +342,7 @@ def scanline_texture(surface, points, uvs, texture, tex_w, tex_h):
 
         inter.sort(key=lambda i: i[0])
 
+        # Fill spans with texture mapping
         for i in range(0, len(inter), 2):
             if i + 1 >= len(inter):
                 continue
