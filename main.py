@@ -80,6 +80,10 @@ def main():
         if ball.is_shot:
             ball.update(gravity=0.5, ground_y=ground.points[0][1])
             
+            # Check collisions with hoop backboard and pole
+            hoop.check_backboard_collision(ball)
+            hoop.check_pole_collision(ball)
+            
             # Check if ball scored
             if not scored and hoop.check_score(ball):
                 score_board.add_points(1)

@@ -130,6 +130,25 @@ class Screen:
         draw_polygon_clipping(surface, pole_mini_points, (xmin, ymin, xmax, ymax), hoop.colors["border"])
         scanline_polygon_clipping(surface, pole_mini_points, hoop.colors["pole"], xmin, ymin, xmax, ymax)
 
+        # Backboard on minimap (draw behind the hoop)
+        backboard_x = hoop.xc + hoop.a_outer - 5
+        backboard_y = hoop.yc - hoop.backboard_height // 2 - 10  # Same offset as in draw method
+        
+        backboard_mini_top_left = transform_point(backboard_x, backboard_y, world_to_minimap)
+        backboard_mini_top_right = transform_point(backboard_x + hoop.backboard_thickness, backboard_y, world_to_minimap)
+        backboard_mini_bottom_left = transform_point(backboard_x, backboard_y + hoop.backboard_height, world_to_minimap)
+        backboard_mini_bottom_right = transform_point(backboard_x + hoop.backboard_thickness, backboard_y + hoop.backboard_height, world_to_minimap)
+        
+        backboard_mini_points = [
+            (int(backboard_mini_top_left[0]), int(backboard_mini_top_left[1])),
+            (int(backboard_mini_top_right[0]), int(backboard_mini_top_right[1])),
+            (int(backboard_mini_bottom_right[0]), int(backboard_mini_bottom_right[1])),
+            (int(backboard_mini_bottom_left[0]), int(backboard_mini_bottom_left[1]))
+        ]
+        
+        draw_polygon_clipping(surface, backboard_mini_points, (xmin, ymin, xmax, ymax), hoop.colors["backboard_border"])
+        scanline_polygon_clipping(surface, backboard_mini_points, hoop.colors["backboard"], xmin, ymin, xmax, ymax)
+
         # Hoop on minimap (outer ellipse - uses ellipse clipping)
         draw_ellipse_clipping(
             surface,
