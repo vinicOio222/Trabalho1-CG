@@ -110,9 +110,10 @@ class Screen:
             int(ball_mini_y),
             max(1, ball_mini_r),
             ball.colors["fill"],
-            ball.colors["border_and_details"]
+            ball.colors["border_and_details"],
+            (xmin, ymin, xmax, ymax)
         )
-
+    
         # Pole on minimap (draw behind the hoop)
         pole_top_y = hoop.yc - hoop.b_outer
         pole_mini_top_x, pole_mini_top_y = transform_point(hoop.xc + hoop.a_outer, pole_top_y, world_to_minimap)
