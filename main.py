@@ -80,6 +80,9 @@ def main():
         if ball.is_shot:
             ball.update(gravity=0.5, ground_y=ground.points[0][1])
             
+            # Check collisions with hoop backboard
+            hoop.check_backboard_collision(ball)
+            
             # Check if ball scored
             if not scored and hoop.check_score(ball):
                 score_board.add_points(1)
@@ -110,6 +113,7 @@ def main():
         screen.clear()
         ground.draw(canvas)
         screen.display_minimap(canvas, ball, hoop, ground)
+        screen.display_hoop_zoom(canvas, ball, hoop)
 
         # Draw game objects
         hoop.draw(canvas)

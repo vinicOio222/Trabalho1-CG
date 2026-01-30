@@ -2,20 +2,25 @@ from graphic.shapes import set_pixel
 from graphic.clipping import space_code, INSIDE
 
 
-def circle_scanline(surface, xc, yc, r, fill_color, border_color):
-    """Scan-line fill a circle centered at (xc, yc) with radius r"""
+def circle_scanline(surface, xc, yc, r, fill_color, border_color, clip_window=None):
+    """Scan-line fill a circle centered at (xc, yc) with radius r.
     
-    # Get surface dimensions
-    width, height = surface.get_size()
+    Args:
+        clip_window: (xmin, ymin, xmax, ymax) opcional. Se None, usa limites da surface.
+    """
+    
+    if clip_window:
+        xmin, ymin, xmax, ymax = clip_window
+    else:
+        xmin, ymin = 0, 0
+        xmax, ymax = surface.get_width() - 1, surface.get_height() - 1
 
-    # Iterate over each y-coordinate within the circle's bounding box
-    for y in range(max(0, yc - r + 1), min(height, yc + r)):
+    for y in range(max(ymin, yc - r + 1), min(ymax + 1, yc + r)):
         inside = False
         x_start = None
         x_end = None
 
-        # Find the start and end x-coordinates for the current y
-        for x in range(max(0, xc - r), min(width, xc + r + 1)):
+        for x in range(max(xmin, xc - r), min(xmax + 1, xc + r + 1)):
             if (x - xc)**2 + (y - yc)**2 <= r*r:
                 if not inside:
                     x_start = x
@@ -26,10 +31,9 @@ def circle_scanline(surface, xc, yc, r, fill_color, border_color):
             continue
 
         for x in range(x_start, x_end + 1):
-            if 0 <= x < width and 0 <= y < height:
+            if xmin <= x <= xmax and ymin <= y <= ymax:
                 if surface.get_at((x, y)) != border_color:
                     set_pixel(surface, x, y, fill_color)
-
 
 def hoop_scanline(
     surface,
