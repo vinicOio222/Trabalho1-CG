@@ -113,6 +113,7 @@ def main():
         screen.clear()
         ground.draw(canvas)
         screen.display_minimap(canvas, ball, hoop, ground)
+        screen.display_hoop_zoom(canvas, ball, hoop)
 
         # Draw game objects
         hoop.draw(canvas)
